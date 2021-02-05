@@ -8,6 +8,7 @@ let balSnelheidY = 5;
 let gameIsGestart = true;
 let levenKwijt = false;
 let levens = 3;
+let score = 0;
 let level = 1;
 let leaderbord = [];
 
@@ -29,32 +30,23 @@ plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2)
 
 const balConstructor = {
   x: plankConstructor.x + (plankConstructor.width / 2),
-  y: 380,
-  kleur: "lavender",
+  y: plankConstructor.y - 25,
+  kleur: "#E6E6FA",
   diameter: 30
 }
 
 // Preload and Setup
 function preload() {
+  // load heart icon
+  heartImage = loadImage('assets/heart.png');
+
+  // load fonts
   loadFont('assets/sansbold.ttf');
   loadFont('assets/sans.ttf');
 }
 
 function setup() {
   createCanvas(canvasWidth, canvasHeight);
-}
-
-//Draw
-function draw() {
-  background("#f04352");
-  if(gameIsGestart && !levenKwijt){ // If gameIsGestart and there is no live lost, draw plank and ball
-    gekkePlank();
-    bal();
-  }else if(levenKwijt){
-     levenKwijtScherm();
-  }
-  
-  
 }
 
 // Screen when live is lost
@@ -65,7 +57,6 @@ function levenKwijtScherm(){
   textFont('sansbold');
   textSize(40);
   text('Leven kwijt!', canvasWidth / 2, canvasHeight / 2)
-  textFont('sans');
   textSize(30);
   if(levens === 1){
     text('Je hebt nu ' + levens + ' leven over', canvasWidth / 2, canvasHeight / 2 + 40);
@@ -76,10 +67,45 @@ function levenKwijtScherm(){
 }
 
 function mainSchermTekst(){
+  // score
   fill('#FFEEEE');
   noStroke();
   textFont('sans')
+  textSize(20)
+  text('Score: ' + score, 40, 30) // waarom de fak verplaatst de score als je maar 2 levens hebt????? i dont begrijp
+
+  // levens
+  switch(levens){
+    case 3:
+      image(heartImage, width - 80, 10, 32, 32)
+      image(heartImage, width - 114, 10, 32, 32)
+      image(heartImage, width - 149, 10, 32, 32)
+      break;
+    case 2:
+      image(heartImage, width - 80, 10, 32, 32)
+      image(heartImage, width - 114, 10, 32, 32)
+      break;
+    case 1:
+      image(heartImage, width - 80, 10, 32, 32)
+      break;
+  }
 }
+
+// Screen when live is lost
+function eindeSpel(){
+  fill('#FFEEEE');
+  textAlign(CENTER);
+  noStroke();
+  textFont('sansbold');
+  textSize(40);
+  text('Game over!', canvasWidth / 2, canvasHeight / 2)
+  textSize(30);
+  text('Je eindscore is ' + score, canvasWidth / 2, canvasHeight / 2 + 40);
+
+  score = 0
+  levens = 3
+}
+
 
 // Ball function
 function bal(){
@@ -104,8 +130,12 @@ function bal(){
     balSnelheidY *= -1;
   }
   if(balConstructor.y >= 750){
-    levenKwijt = true;
-    levens--;
+    if(levens === 0){
+      gameIsGestart = false;
+    }else{
+      levenKwijt = true;
+      levens--;
+    } 
   }
 
   // ball movement
@@ -135,8 +165,13 @@ function keyPressed() {
     case 32:
       if(levenKwijt){
         levenKwijt = false;
-        balConstructor.y = 380;
-        balConstructor.x = beweging + 50;
+        balConstructor.y = plankConstructor.y - 25;
+        balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
+      }else if(!gameIsGestart){
+        gameIsGestart = true;
+        plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2)
+        balConstructor.y = plankConstructor.y - 25;
+        balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
       }
       break;
   }
@@ -151,6 +186,20 @@ function keyReleased() {
       leftKey = false;
       break;
 
+  }
+}
+
+//Draw
+function draw() {
+  background("#f04352");
+  if(gameIsGestart && !levenKwijt){ // If gameIsGestart and there is no life lost, draw plank and ball
+    mainSchermTekst();
+    gekkePlank();
+    bal();
+  }else if(levenKwijt){
+     levenKwijtScherm();
+  }else if(!gameIsGestart){
+    eindeSpel();
   }
 }
 

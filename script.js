@@ -71,22 +71,22 @@ function mainSchermTekst(){
   fill('#FFEEEE');
   noStroke();
   textFont('sans')
-  textSize(20)
-  text('Score: ' + score, 40, 30) // waarom de fak verplaatst de score als je maar 2 levens hebt????? i dont begrijp
+  textSize(20);
+  text('Score: ' + score, 40, 30); // waarom verplaatst de score als je maar 2 levens hebt????? i dont begrijp
 
   // levens
   switch(levens){
     case 3:
-      image(heartImage, width - 80, 10, 32, 32)
-      image(heartImage, width - 114, 10, 32, 32)
-      image(heartImage, width - 149, 10, 32, 32)
+      image(heartImage, width - 80, 10, 32, 32);
+      image(heartImage, width - 114, 10, 32, 32);
+      image(heartImage, width - 149, 10, 32, 32);
       break;
     case 2:
-      image(heartImage, width - 80, 10, 32, 32)
-      image(heartImage, width - 114, 10, 32, 32)
+      image(heartImage, width - 80, 10, 32, 32);
+      image(heartImage, width - 114, 10, 32, 32);
       break;
     case 1:
-      image(heartImage, width - 80, 10, 32, 32)
+      image(heartImage, width - 80, 10, 32, 32);
       break;
   }
 }
@@ -98,12 +98,12 @@ function eindeSpel(){
   noStroke();
   textFont('sansbold');
   textSize(40);
-  text('Game over!', canvasWidth / 2, canvasHeight / 2)
+  text('Game over!', canvasWidth / 2, canvasHeight / 2);
   textSize(30);
   text('Je eindscore is ' + score, canvasWidth / 2, canvasHeight / 2 + 40);
 
-  score = 0
-  levens = 3
+  score = 0;
+  levens = 3;
 }
 
 
@@ -169,7 +169,7 @@ function keyPressed() {
         balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
       }else if(!gameIsGestart){
         gameIsGestart = true;
-        plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2)
+        plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2);
         balConstructor.y = plankConstructor.y - 25;
         balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
       }

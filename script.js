@@ -1,7 +1,7 @@
 // Required variables
 let rightKey = false;
 let leftKey = false;
-let canvasWidth = 1500
+let canvasWidth = 1800
 let canvasHeight = 750
 let balSnelheidX = 5;
 let balSnelheidY = 5;
@@ -26,7 +26,8 @@ const plankConstructor = {
   kleur: "cornflowerblue"
 }
 
-plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2)
+plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2);
+plankConstructor.y = canvasHeight - 50;
 
 const balConstructor = {
   x: plankConstructor.x + (plankConstructor.width / 2),

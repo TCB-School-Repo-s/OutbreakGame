@@ -35,11 +35,11 @@ body {
   background-image: url("assets/logo.svg");
   width: 100%;
   position: absolute;
-  height: 100px;
+  height: 80px;
 }
 
 canvas {
   border-radius: 25px;
   box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.5);
-  transform: translateY(130px);
+  transform: translateY(110px);
 }

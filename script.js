@@ -52,9 +52,9 @@ function setup() {
 
 // Screen when live is lost
 function levenKwijtScherm(){
+  noStroke();
   fill('#FFEEEE');
   textAlign(CENTER);
-  noStroke();
   textFont('sansbold');
   textSize(40);
   text('Leven kwijt!', canvasWidth / 2, canvasHeight / 2)
@@ -69,8 +69,8 @@ function levenKwijtScherm(){
 
 function mainSchermTekst(){
   // score
-  fill('#FFEEEE');
   noStroke();
+  fill('#FFEEEE');
   textFont('sans')
   textSize(20);
   text('Score: ' + score, 40, 30); // waarom verplaatst de score als je maar 2 levens hebt????? i dont begrijp
@@ -94,15 +94,14 @@ function mainSchermTekst(){
 
 // Screen when live is lost
 function eindeSpel(){
+  noStroke();
   fill('#FFEEEE');
   textAlign(CENTER);
-  noStroke();
   textFont('sansbold');
   textSize(40);
   text('Game over!', canvasWidth / 2, canvasHeight / 2);
   textSize(30);
   text('Je eindscore is ' + score, canvasWidth / 2, canvasHeight / 2 + 40);
-
   score = 0;
   levens = 3;
 }
@@ -150,7 +149,7 @@ function gekkePlank(){
   rect(plankConstructor.x, plankConstructor.y, plankConstructor.width, 20, 25);
   if(rightKey && plankConstructor.x < width - plankConstructor.width){
     plankConstructor.x += 18;
-  }else if(leftKey && plankConstructor.x > 4){
+  }else if(leftKey && plankConstructor.x > 0){
     plankConstructor.x -= 18;
   }
 }
@@ -162,6 +161,9 @@ function keyPressed() {
       break;
     case 37:
       leftKey = true;
+      break;
+    case 74:
+      level = 2;
       break;
     case 32:
       if(levenKwijt){

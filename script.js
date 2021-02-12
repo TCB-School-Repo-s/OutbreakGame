@@ -1,21 +1,26 @@
 // Required variables
 let rightKey = false;
 let leftKey = false;
-let canvasWidth = 1800
-let canvasHeight = 750
+const canvasWidth = 1800
+const canvasHeight = 750
 let balSnelheidX = 5;
 let balSnelheidY = 5;
+let rij = 8;
+let kolom = 9;
 let gameIsGestart = true;
 let levenKwijt = false;
 let levens = 3;
 let score = 0;
 let level = 1;
-let leaderbord = [];
+const blokkies = [];
 
 // Moeilijkheid
-if(level > 1){
+if (level > 1) {
   balSnelheidX = balSnelheidX * level * 0.5;
   balSnelheidY = balSnelheidY * level * 0.5;
+  if(!rij <= 14){
+    rij = rij + level;
+  }
 }
 
 // Constructors
@@ -48,10 +53,11 @@ function preload() {
 
 function setup() {
   createCanvas(canvasWidth, canvasHeight);
+  maakBlokkies();
 }
 
 // Screen when live is lost
-function levenKwijtScherm(){
+function levenKwijtScherm() {
   noStroke();
   fill('#FFEEEE');
   textAlign(CENTER);
@@ -59,24 +65,24 @@ function levenKwijtScherm(){
   textSize(40);
   text('Leven kwijt!', canvasWidth / 2, canvasHeight / 2)
   textSize(30);
-  if(levens === 1){
+  if (levens === 1) {
     text('Je hebt nu ' + levens + ' leven over', canvasWidth / 2, canvasHeight / 2 + 40);
-  }else{
+  } else {
     text('Je hebt nu ' + levens + ' levens over', canvasWidth / 2, canvasHeight / 2 + 40);
   }
-  
+
 }
 
-function mainSchermTekst(){
+function mainSchermTekst() {
   // score
   noStroke();
   fill('#FFEEEE');
   textFont('sans')
   textSize(20);
-  text('Score: ' + score, 40, 30); // waarom verplaatst de score als je maar 2 levens hebt????? i dont begrijp
+  text('Score: ' + score, 45, 30);
 
   // levens
-  switch(levens){
+  switch (levens) {
     case 3:
       image(heartImage, width - 80, 10, 32, 32);
       image(heartImage, width - 114, 10, 32, 32);
@@ -92,8 +98,32 @@ function mainSchermTekst(){
   }
 }
 
+// Maakt de blokjes
+function maakBlokkies() {
+  const blokBreedte = width / kolom - 4
+  for (let c = 0; c < kolom; c++) {
+    for (let l = 0; l < rij; l++) {
+      const blok = {
+        kleur: "#008B8B",
+        h: 30,
+        b: blokBreedte,
+        x: c * (blokBreedte + 2) + 10,
+        y: l * (30 + 2) + 40
+      }
+      blokkies.push(blok);
+    }
+  }
+}
+
+function blokkiesZeichnen() {
+  blokkies.forEach(blok => {
+    fill(blok.kleur);
+    rect(blok.x, blok.y, blok.b, blok.h);
+  })
+}
+
 // Screen when live is lost
-function eindeSpel(){
+function eindeSpel() {
   noStroke();
   fill('#FFEEEE');
   textAlign(CENTER);
@@ -108,34 +138,40 @@ function eindeSpel(){
 
 
 // Ball function
-function bal(){
+function bal() {
   noStroke();
   fill(balConstructor.kleur);
-  ellipse(balConstructor.x, balConstructor.y , balConstructor.diameter, balConstructor.diameter);
+  ellipse(balConstructor.x, balConstructor.y, balConstructor.diameter, balConstructor.diameter);
 
-  if(balConstructor.y <= balConstructor.diameter / 2){ // If ball touches ceiling of canvas, bounce off
+  if (balConstructor.y <= balConstructor.diameter / 2) { // If ball touches ceiling of canvas, bounce off
     balSnelheidY *= -1;
   }
-  if(balConstructor.x <= balConstructor.diameter / 2 || balConstructor.x >= width - (balConstructor.diameter / 2)){ // If ball touches edge of canvas, bounce off
+  if (balConstructor.x <= balConstructor.diameter / 2 || balConstructor.x >= width - (balConstructor.diameter / 2)) { // If ball touches edge of canvas, bounce off
     balSnelheidX *= -1;
   }
-  if(balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x && balConstructor.x <= plankConstructor.x + (plankConstructor.width / 2)){ // If ball touches first part of blank, bounce to the left and bounce off
-    if(balSnelheidX < 0) balSnelheidX = balSnelheidX;
-    if(balSnelheidX > 0) balSnelheidX *= -1;
-     balSnelheidY *= -1;
-  }
-  if(balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x + (plankConstructor.width / 2) && balConstructor.x <= plankConstructor.x + plankConstructor.width){ // if ball touches second part of the plank, bounce to the right and bounce off
-    if(balSnelheidX < 0) balSnelheidX *= -1;
-    if(balSnelheidX > 0) balSnelheidX = balSnelheidX;
+  if (balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x && balConstructor.x <= plankConstructor.x + (plankConstructor.width / 2)) { // If ball touches first part of blank, bounce to the left and bounce off
+    if (balSnelheidX < 0) balSnelheidX = balSnelheidX;
+    if (balSnelheidX > 0) balSnelheidX *= -1;
     balSnelheidY *= -1;
   }
-  if(balConstructor.y >= 750){
-    if(levens === 0){
+  if (balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x + (plankConstructor.width / 2) && balConstructor.x <= plankConstructor.x + plankConstructor.width) { // if ball touches second part of the plank, bounce to the right and bounce off
+    if (balSnelheidX < 0) balSnelheidX *= -1;
+    if (balSnelheidX > 0) balSnelheidX = balSnelheidX;
+    balSnelheidY *= -1;
+  }
+  blokkies.forEach((blok, index) => {
+    if(balConstructor.y >= blok.y + blok.h + balConstructor.diameter / 2){
+      blokkies.splice(index, 1);
+      balSnelheidY *= -1
+    }
+  }) 
+  if (balConstructor.y >= 750) {
+    if (levens === 0) {
       gameIsGestart = false;
-    }else{
+    } else {
       levenKwijt = true;
       levens--;
-    } 
+    }
   }
 
   // ball movement
@@ -144,33 +180,30 @@ function bal(){
 }
 
 // Draw plank
-function gekkePlank(){
+function gekkePlank() {
   fill(plankConstructor.kleur);
   rect(plankConstructor.x, plankConstructor.y, plankConstructor.width, 20, 25);
-  if(rightKey && plankConstructor.x < width - plankConstructor.width){
+  if (rightKey && plankConstructor.x < width - plankConstructor.width) {
     plankConstructor.x += 18;
-  }else if(leftKey && plankConstructor.x > 0){
+  } else if (leftKey && plankConstructor.x > 0) {
     plankConstructor.x -= 18;
   }
 }
 
 function keyPressed() {
-  switch(keyCode){
+  switch (keyCode) {
     case 39:
       rightKey = true;
       break;
     case 37:
       leftKey = true;
       break;
-    case 74:
-      level = 2;
-      break;
     case 32:
-      if(levenKwijt){
+      if (levenKwijt) {
         levenKwijt = false;
         balConstructor.y = plankConstructor.y - 25;
         balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
-      }else if(!gameIsGestart){
+      } else if (!gameIsGestart) {
         gameIsGestart = true;
         plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2);
         balConstructor.y = plankConstructor.y - 25;
@@ -181,7 +214,7 @@ function keyPressed() {
 }
 
 function keyReleased() {
-  switch(keyCode){
+  switch (keyCode) {
     case 39:
       rightKey = false;
       break;
@@ -195,16 +228,16 @@ function keyReleased() {
 //Draw
 function draw() {
   background("#f04352");
-  if(gameIsGestart && !levenKwijt){ // If gameIsGestart and there is no life lost, draw plank and ball
-    mainSchermTekst();
+  if (gameIsGestart && !levenKwijt) { // If gameIsGestart and there is no life lost, draw plank and ball
+    blokkiesZeichnen()
     gekkePlank();
     bal();
-  }else if(levenKwijt){
-     levenKwijtScherm();
-  }else if(!gameIsGestart){
+    mainSchermTekst();
+  } else if (levenKwijt) {
+    levenKwijtScherm();
+  } else if (!gameIsGestart) {
     eindeSpel();
   }
 }
 
-// VRAGEN VOOR WUMPIE --> HOE KAN HET DAT DEZELFDE CODE INEENS ANDERS WERKT DAN DAT IE DEED VOORHEEN?! (plank doet raar)
 

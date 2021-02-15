@@ -41,8 +41,8 @@ plankConstructor.y = canvasHeight - 50;
 const balConstructor = {
   x: plankConstructor.x + (plankConstructor.width / 2),
   y: plankConstructor.y - 25,
-  kleur: "#E6E6FA",
-  diameter: 30
+  diameter: 30,
+  kleur: "#E6E6FA"
 }
 
 // Preload and Setup
@@ -164,7 +164,7 @@ function blokkiesZeichnen() {
   })
 }
 
-// Screen when life is lost
+// Screen when lie is lost
 function eindeSpel() {
   noStroke();
   fill('#FFEEEE');

@@ -13,7 +13,7 @@ let volgendLevel = false;
 let levens = 3;
 let score = 0;
 let level = 1;
-let muziekVolume = 0.03;
+var muziekVolume = 0.03;
 let currentSong;
 const blokkies = [];
 
@@ -61,6 +61,11 @@ function preload() {
   // load fonts
   loadFont('assets/sansbold.ttf');
   loadFont('assets/sans.ttf');
+
+  // instellingen gui
+  sliderRange(0, 1, 0.01);
+  var gui = createGui('Intellingen');
+  gui.addGlobals('muziekVolume');
 }
 
 function setup() {
@@ -294,6 +299,8 @@ function draw() {
         currentSong = themeSongs[song];
         currentSong.setVolume(muziekVolume);
         currentSong.play();
+      }else{
+        currentSong.setVolume(muziekVolume)
       }
     }else {
       let song = Math.round(Math.random() * (5 - 0) + 0);
@@ -308,6 +315,7 @@ function draw() {
     mainSchermTekst();
   } else if (levenKwijt) {
     levenKwijtScherm();
+    currentSong.setVolume(muziekVolume)
   } else if (!gameIsGestart) {
     eindeSpel();
   }

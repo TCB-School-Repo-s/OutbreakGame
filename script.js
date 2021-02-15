@@ -9,6 +9,7 @@ let rij = 8;
 let kolom = 9;
 let gameIsGestart = true;
 let levenKwijt = false;
+let volgendLevel = false;
 let levens = 3;
 let score = 0;
 let level = 1;
@@ -122,7 +123,17 @@ function mainSchermTekst() {
       image(heartImage, width - 80, 10, 32, 32);
       break;
   }
+
 }
+
+// Aantal blokken checken
+/* function hoeveelBlokkies(){
+  if(blokkies.length === null){
+    return true;
+  }
+}
+
+*/
 
 // Maakt de blokjes
 function maakBlokkies() {
@@ -193,7 +204,7 @@ function bal() {
   blokkies.forEach((blok, index) => {
     if(blockCheck(blok)){
       blokGeluid.play();
-      console.log("Block broken")
+      console.log("Block broken");
       score++;
       blokkies.splice(index, 1);
       balSnelheidY *= -1;

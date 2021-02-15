@@ -3,8 +3,8 @@ let rightKey = false;
 let leftKey = false;
 const canvasWidth = 1800
 const canvasHeight = 750
-let balSnelheidX = 5;
-let balSnelheidY = 5;
+let balSnelheidX = 7;
+let balSnelheidY = 7;
 let rij = 8;
 let kolom = 9;
 let gameIsGestart = true;
@@ -12,7 +12,10 @@ let levenKwijt = false;
 let levens = 3;
 let score = 0;
 let level = 1;
+let muziekVolume = 0.03;
+let currentSong;
 const blokkies = [];
+
 
 // Moeilijkheid
 if (level > 1) {
@@ -46,6 +49,11 @@ function preload() {
   // load heart icon
   heartImage = loadImage('assets/heart.png');
 
+  // Sounds
+  soundFormats('mp3');
+  blokGeluid = loadSound('assets/blockhit')
+  themeSongs = [loadSound('assets/music/1'), loadSound('assets/music/2'), loadSound('assets/music/3'), loadSound('assets/music/4'), ('assets/music/5'), ('assets/music/6')];
+
   // load fonts
   loadFont('assets/sansbold.ttf');
   loadFont('assets/sans.ttf');
@@ -54,6 +62,7 @@ function preload() {
 function setup() {
   createCanvas(canvasWidth, canvasHeight);
   maakBlokkies();
+  blokGeluid.setVolume(0.5)
 }
 
 // Screen when live is lost
@@ -132,8 +141,6 @@ function eindeSpel() {
   text('Game over!', canvasWidth / 2, canvasHeight / 2);
   textSize(30);
   text('Je eindscore is ' + score, canvasWidth / 2, canvasHeight / 2 + 40);
-  score = 0;
-  levens = 3;
 }
 
 
@@ -152,19 +159,28 @@ function bal() {
   if (balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x && balConstructor.x <= plankConstructor.x + (plankConstructor.width / 2)) { // If ball touches first part of blank, bounce to the left and bounce off
     if (balSnelheidX < 0) balSnelheidX = balSnelheidX;
     if (balSnelheidX > 0) balSnelheidX *= -1;
+    rightKey = false
+    leftKey = false
     balSnelheidY *= -1;
   }
   if (balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x + (plankConstructor.width / 2) && balConstructor.x <= plankConstructor.x + plankConstructor.width) { // if ball touches second part of the plank, bounce to the right and bounce off
     if (balSnelheidX < 0) balSnelheidX *= -1;
     if (balSnelheidX > 0) balSnelheidX = balSnelheidX;
+    rightKey = false
+    leftKey = false
     balSnelheidY *= -1;
   }
+
   blokkies.forEach((blok, index) => {
-    if(balConstructor.y >= blok.y + blok.h + balConstructor.diameter / 2){
+    if(blockCheck(blok)){
+      balSnelheidY *= -1;
+      blokGeluid.play();
+      console.log("Block broken")
+      score++;
       blokkies.splice(index, 1);
-      balSnelheidY *= -1
     }
-  }) 
+  })
+
   if (balConstructor.y >= 750) {
     if (levens === 0) {
       gameIsGestart = false;
@@ -177,6 +193,12 @@ function bal() {
   // ball movement
   balConstructor.x += balSnelheidX;
   balConstructor.y += balSnelheidY;
+}
+
+function blockCheck(blok){
+  if(balConstructor.y < blok.y + 2 + blok.h + balConstructor.diameter / 2 && balConstructor.x > blok.x  && balConstructor.x < blok.x + blok.b){
+    return true;
+  }
 }
 
 // Draw plank
@@ -204,10 +226,13 @@ function keyPressed() {
         balConstructor.y = plankConstructor.y - 25;
         balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
       } else if (!gameIsGestart) {
-        gameIsGestart = true;
+        maakBlokkies();
+        score = 0;
+        levens = 3;
         plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2);
         balConstructor.y = plankConstructor.y - 25;
         balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
+        gameIsGestart = true;
       }
       break;
   }
@@ -229,6 +254,21 @@ function keyReleased() {
 function draw() {
   background("#f04352");
   if (gameIsGestart && !levenKwijt) { // If gameIsGestart and there is no life lost, draw plank and ball
+    if(currentSong){
+      if(!currentSong.isPlaying()){
+        let song = Math.round(Math.random() * (5 - 0) + 0);
+        console.log(song)
+        currentSong = themeSongs[song];
+        currentSong.setVolume(muziekVolume);
+        currentSong.play();
+      }
+    }else {
+      let song = Math.round(Math.random() * (5 - 0) + 0);
+      console.log(song)
+      currentSong = themeSongs[song];
+      currentSong.setVolume(muziekVolume);
+      currentSong.play();
+    }
     blokkiesZeichnen()
     gekkePlank();
     bal();

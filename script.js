@@ -164,7 +164,7 @@ function blokkiesZeichnen() {
   })
 }
 
-// Screen when live is lost
+// Screen when life is lost
 function eindeSpel() {
   noStroke();
   fill('#FFEEEE');

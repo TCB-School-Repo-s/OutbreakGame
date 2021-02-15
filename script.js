@@ -51,8 +51,11 @@ function preload() {
 
   // Sounds
   soundFormats('mp3');
-  blokGeluid = loadSound('assets/blockhit')
-  themeSongs = [loadSound('assets/music/1'), loadSound('assets/music/2'), loadSound('assets/music/3'), loadSound('assets/music/4'), ('assets/music/5'), ('assets/music/6')];
+  blokGeluid = loadSound('assets/blockhit');
+  plankGeluid = loadSound('assets/paddlehit');
+  levenKwijtGeluid = loadSound('assets/livelost');
+  gameOverGeluid = loadSound('assets/death.mp3');
+  themeSongs = [loadSound('assets/music/1'), loadSound('assets/music/2'), loadSound('assets/music/3'), loadSound('assets/music/4'), loadSound('assets/music/5'), loadSound('assets/music/6')];
 
   // load fonts
   loadFont('assets/sansbold.ttf');
@@ -62,7 +65,10 @@ function preload() {
 function setup() {
   createCanvas(canvasWidth, canvasHeight);
   maakBlokkies();
-  blokGeluid.setVolume(0.5)
+  blokGeluid.setVolume(0.3);
+  plankGeluid.setVolume(0.3);
+  levenKwijtGeluid.setVolume(0.3);
+  gameOverGeluid.setVolume(0.3);
 }
 
 // Screen when live is lost
@@ -79,7 +85,18 @@ function levenKwijtScherm() {
   } else {
     text('Je hebt nu ' + levens + ' levens over', canvasWidth / 2, canvasHeight / 2 + 40);
   }
+}
 
+// scherm volgend level
+function volgendlevelScherm(){
+  noStroke();
+  fill('#00CDAD');
+  textAlign(CENTER);
+  textFont('sansbold');
+  textSize(40)
+  text('Gefeliciteerd!', canvasWidth / 2, canvasHeight / 2)
+  textSize(30);
+  text('Je hebt level ' + level + ' gehaald!', canvasWidth / 2, canvasHeight / 2 + 40 );
 }
 
 function mainSchermTekst() {
@@ -156,9 +173,10 @@ function bal() {
   if (balConstructor.x <= balConstructor.diameter / 2 || balConstructor.x >= width - (balConstructor.diameter / 2)) { // If ball touches edge of canvas, bounce off
     balSnelheidX *= -1;
   }
-  if (balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x && balConstructor.x <= plankConstructor.x + (plankConstructor.width / 2)) { // If ball touches first part of blank, bounce to the left and bounce off
+  if (balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x && balConstructor.x <= plankConstructor.x + (plankConstructor.width / 2)) { // If ball touches first part of plank, bounce to the left and bounce off
     if (balSnelheidX < 0) balSnelheidX = balSnelheidX;
     if (balSnelheidX > 0) balSnelheidX *= -1;
+    plankGeluid.play();
     rightKey = false
     leftKey = false
     balSnelheidY *= -1;
@@ -166,6 +184,7 @@ function bal() {
   if (balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x + (plankConstructor.width / 2) && balConstructor.x <= plankConstructor.x + plankConstructor.width) { // if ball touches second part of the plank, bounce to the right and bounce off
     if (balSnelheidX < 0) balSnelheidX *= -1;
     if (balSnelheidX > 0) balSnelheidX = balSnelheidX;
+    plankGeluid.play();
     rightKey = false
     leftKey = false
     balSnelheidY *= -1;
@@ -173,18 +192,21 @@ function bal() {
 
   blokkies.forEach((blok, index) => {
     if(blockCheck(blok)){
-      balSnelheidY *= -1;
       blokGeluid.play();
       console.log("Block broken")
       score++;
       blokkies.splice(index, 1);
+      balSnelheidY *= -1;
     }
   })
 
   if (balConstructor.y >= 750) {
     if (levens === 0) {
+      currentSong.stop();
       gameIsGestart = false;
+      gameOverGeluid.play();
     } else {
+      levenKwijtGeluid.play();
       levenKwijt = true;
       levens--;
     }

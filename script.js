@@ -13,10 +13,20 @@ let volgendLevel = false;
 let levens = 3;
 let score = 0;
 let level = 1;
-var muziekVolume = 0.03;
 let currentSong;
 const blokkies = [];
 
+// save data
+if(window.localStorage.getItem('musicVolume') === null){ // muziekVolume opslaan
+  window.localStorage.setItem('musicVolume', 0.03);
+  var muziekVolume = parseFloat(window.localStorage.getItem('musicVolume'));
+}else {
+  var muziekVolume = parseFloat(window.localStorage.getItem('musicVolume'));
+}
+
+if(window.localStorage.getItem('leaderboard') === null){
+  // leaderboard komt hier
+}
 
 // Moeilijkheid
 if (level > 1) {
@@ -56,7 +66,7 @@ function preload() {
   plankGeluid = loadSound('assets/paddlehit');
   levenKwijtGeluid = loadSound('assets/livelost');
   gameOverGeluid = loadSound('assets/death.mp3');
-  themeSongs = [loadSound('assets/music/1'), loadSound('assets/music/2'), loadSound('assets/music/3'), loadSound('assets/music/4'), loadSound('assets/music/5'), loadSound('assets/music/6')];
+  themeSongs = [loadSound('assets/music/1'), loadSound('assets/music/2'), loadSound('assets/music/3'), loadSound('assets/music/4'), loadSound('assets/music/5')];
 
   // load fonts
   loadFont('assets/sansbold.ttf');
@@ -207,7 +217,7 @@ function bal() {
   }
 
   blokkies.forEach((blok, index) => {
-    if(blockCheck(blok)){
+    if(balConstructor.y < blok.y + 2 + blok.h + balConstructor.diameter / 2 && balConstructor.x > blok.x  && balConstructor.x < blok.x + blok.b){
       blokGeluid.play();
       console.log("Block broken");
       score++;
@@ -215,6 +225,10 @@ function bal() {
       balSnelheidY *= -1;
     }
   })
+
+  if(blokkies.length === 0){
+    console.log("geen blokke meer");
+  }
 
   if (balConstructor.y >= 750) {
     if (levens === 0) {
@@ -231,12 +245,6 @@ function bal() {
   // ball movement
   balConstructor.x += balSnelheidX;
   balConstructor.y += balSnelheidY;
-}
-
-function blockCheck(blok){
-  if(balConstructor.y < blok.y + 2 + blok.h + balConstructor.diameter / 2 && balConstructor.x > blok.x  && balConstructor.x < blok.x + blok.b){
-    return true;
-  }
 }
 
 // Draw plank
@@ -291,22 +299,23 @@ function keyReleased() {
 //Draw
 function draw() {
   background("#f04352");
-  if (gameIsGestart && !levenKwijt) { // If gameIsGestart and there is no life lost, draw plank and ball
-    if(currentSong){
+  window.localStorage.setItem('musicVolume', muziekVolume);
+  if (gameIsGestart && !levenKwijt) {// If gameIsGestart and there is no life lost, draw plank and ball
+    if(currentSong){ 
       if(!currentSong.isPlaying()){
-        let song = Math.round(Math.random() * (5 - 0) + 0);
+        let song = Math.round(Math.random() * (4 - 0) + 0);
         console.log(song)
         currentSong = themeSongs[song];
-        currentSong.setVolume(muziekVolume);
+        currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume')));
         currentSong.play();
       }else{
-        currentSong.setVolume(muziekVolume)
+        currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume')))
       }
     }else {
-      let song = Math.round(Math.random() * (5 - 0) + 0);
+      let song = Math.round(Math.random() * (4 - 0) + 0);
       console.log(song)
       currentSong = themeSongs[song];
-      currentSong.setVolume(muziekVolume);
+      currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume')));
       currentSong.play();
     }
     blokkiesZeichnen()
@@ -315,7 +324,7 @@ function draw() {
     mainSchermTekst();
   } else if (levenKwijt) {
     levenKwijtScherm();
-    currentSong.setVolume(muziekVolume)
+    currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume')))
   } else if (!gameIsGestart) {
     eindeSpel();
   }

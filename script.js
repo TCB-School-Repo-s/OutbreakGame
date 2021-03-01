@@ -5,8 +5,8 @@ const canvasWidth = 1800
 const canvasHeight = 750
 let balSnelheidX = 7;
 let balSnelheidY = 7;
-let rij = 8;
-let kolom = 9;
+var rij = 9;
+var kolom = 8;
 let gameIsGestart = true;
 let levenKwijt = false;
 let volgendLevel = false;
@@ -14,6 +14,7 @@ let levens = 3;
 let score = 0;
 let level = 1;
 let currentSong;
+const kleurtjes = ['#7400B8', '#6930C3', '#5E60CE', '#5390D9', '#4EA8DE', '#48BFE3', '#56CFE1', '#64DFDF', '#72EFDD', '#80FFDB'];
 const blokkies = [];
 
 // save data
@@ -28,21 +29,12 @@ if(window.localStorage.getItem('leaderboard') === null){
   // leaderboard komt hier
 }
 
-// Moeilijkheid
-if (level > 1) {
-  balSnelheidX = balSnelheidX * level * 0.5;
-  balSnelheidY = balSnelheidY * level * 0.5;
-  if(!rij <= 14){
-    rij = rij + level;
-  }
-}
-
 // Constructors
 const plankConstructor = {
   x: 750,
   y: 700,
   width: 100,
-  kleur: "cornflowerblue"
+  kleur: "#ABABAB"
 }
 
 plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2);
@@ -57,9 +49,6 @@ const balConstructor = {
 
 // Preload and Setup
 function preload() {
-  // load heart icon
-  heartImage = loadImage('assets/heart.png');
-
   // Sounds
   soundFormats('mp3');
   blokGeluid = loadSound('assets/blockhit');
@@ -74,7 +63,7 @@ function preload() {
 
   // instellingen gui
   sliderRange(0, 1, 0.01);
-  var gui = createGui('Intellingen');
+  var gui = createGui('Instellingen');
   gui.addGlobals('muziekVolume');
 }
 
@@ -106,13 +95,13 @@ function levenKwijtScherm() {
 // scherm volgend level
 function volgendlevelScherm(){
   noStroke();
-  fill('#00CDAD');
+  fill('#FFEEEE');
   textAlign(CENTER);
   textFont('sansbold');
   textSize(40)
   text('Gefeliciteerd!', canvasWidth / 2, canvasHeight / 2)
   textSize(30);
-  text('Je hebt level ' + level + ' gehaald!', canvasWidth / 2, canvasHeight / 2 + 40 );
+  text('Je hebt level ' + (level - 1) + ' gehaald!', canvasWidth / 2, canvasHeight / 2 + 40 );
 }
 
 function mainSchermTekst() {
@@ -126,16 +115,19 @@ function mainSchermTekst() {
   // levens
   switch (levens) {
     case 3:
-      image(heartImage, width - 80, 10, 32, 32);
-      image(heartImage, width - 114, 10, 32, 32);
-      image(heartImage, width - 149, 10, 32, 32);
+      fill('#E6E6FA')
+      hart(width - 80, 10, 25)
+      hart(width - 114, 10, 25)
+      hart(width - 149, 10, 25)
       break;
     case 2:
-      image(heartImage, width - 80, 10, 32, 32);
-      image(heartImage, width - 114, 10, 32, 32);
+      fill('#E6E6FA')
+      hart(width - 80, 10, 25)
+      hart(width - 114, 10, 25)
       break;
     case 1:
-      image(heartImage, width - 80, 10, 32, 32);
+      fill('#E6E6FA')
+      hart(width - 80, 10, 25)
       break;
   }
 
@@ -156,7 +148,7 @@ function maakBlokkies() {
   for (let c = 0; c < kolom; c++) {
     for (let l = 0; l < rij; l++) {
       const blok = {
-        kleur: "#008B8B",
+        kleur: kleurtjes[l],
         h: 30,
         b: blokBreedte,
         x: c * (blokBreedte + 2) + 10,
@@ -186,6 +178,14 @@ function eindeSpel() {
   text('Je eindscore is ' + score, canvasWidth / 2, canvasHeight / 2 + 40);
 }
 
+
+function hart(x, y, s) {
+  beginShape();
+  vertex(x, y);
+  bezierVertex(x - s / 2, y - s / 2, x - s, y + s / 3, x, y + s);
+  bezierVertex(x + s, y + s / 3, x + s / 2, y - s / 2, x, y);
+  endShape(CLOSE);
+}
 
 // Ball function
 function bal() {
@@ -227,7 +227,14 @@ function bal() {
   })
 
   if(blokkies.length === 0){
-    console.log("geen blokke meer");
+    level++
+    balSnelheidX++
+    balSnelheidY++
+    if (rij <= 14){
+      rij++
+    }
+    volgendLevel = true;
+    gameIsGestart = false;
   }
 
   if (balConstructor.y >= 750) {
@@ -271,13 +278,26 @@ function keyPressed() {
         levenKwijt = false;
         balConstructor.y = plankConstructor.y - 25;
         balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
-      } else if (!gameIsGestart) {
+      } else if (!gameIsGestart && !volgendLevel) {
+        rij = 9;
+        kolom = 8;
+        level = 1;
+        blokkies.length = 0;
+        balSnelheidX = 7;
+        balSnelheidY = 7;
         maakBlokkies();
         score = 0;
         levens = 3;
         plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2);
         balConstructor.y = plankConstructor.y - 25;
         balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
+        gameIsGestart = true;
+      } else if (!gameIsGestart && volgendLevel){
+        maakBlokkies();
+        plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2);
+        balConstructor.y = plankConstructor.y - 25;
+        balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
+        volgendLevel = false;
         gameIsGestart = true;
       }
       break;
@@ -298,7 +318,7 @@ function keyReleased() {
 
 //Draw
 function draw() {
-  background("#f04352");
+  background("#000000");
   window.localStorage.setItem('musicVolume', muziekVolume);
   if (gameIsGestart && !levenKwijt) {// If gameIsGestart and there is no life lost, draw plank and ball
     if(currentSong){ 
@@ -324,9 +344,11 @@ function draw() {
     mainSchermTekst();
   } else if (levenKwijt) {
     levenKwijtScherm();
-    currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume')))
-  } else if (!gameIsGestart) {
+    currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume')));
+  } else if (!gameIsGestart && !volgendLevel) {
     eindeSpel();
+  } else if(volgendLevel && !gameIsGestart){
+    volgendlevelScherm();
   }
 }
 

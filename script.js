@@ -133,15 +133,6 @@ function mainSchermTekst() {
 
 }
 
-// Aantal blokken checken
-/* function hoeveelBlokkies(){
-  if(blokkies.length === null){
-    return true;
-  }
-}
-
-*/
-
 // Maakt de blokjes
 function maakBlokkies() {
   const blokBreedte = width / kolom - 4

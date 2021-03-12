@@ -47,6 +47,8 @@ const balConstructor = {
   kleur: "#E6E6FA"
 }
 
+const powerUp = ['BIGGER_PLANK', "EXTRA_BALL", "TRIPLE_BALL"]
+
 // Preload and Setup
 function preload() {
   // Sounds
@@ -133,15 +135,31 @@ function mainSchermTekst() {
 
 }
 
+function chance(p){
+  var d = Math.random();
+  if(d < ((100 - p) / 100)){
+    return false;
+  }else {
+    return true;
+  }
+}
+
 // Maakt de blokjes
 function maakBlokkies() {
   const blokBreedte = width / kolom - 4
   for (let c = 0; c < kolom; c++) {
     for (let l = 0; l < rij; l++) {
+      // const powerupType = Math.round(Math.random() * (2 - 0) + 0)
+      const powerupType = 0;
+      
       const blok = {
         kleur: kleurtjes[l],
         h: 30,
         b: blokBreedte,
+        powerup: {
+          enabled: chance(25),
+          type: powerupType
+        },
         x: c * (blokBreedte + 2) + 10,
         y: l * (30 + 2) + 40
       }
@@ -157,7 +175,7 @@ function blokkiesZeichnen() {
   })
 }
 
-// Screen when lie is lost
+// Screen when no life left
 function eindeSpel() {
   noStroke();
   fill('#FFEEEE');
@@ -209,6 +227,23 @@ function bal() {
 
   blokkies.forEach((blok, index) => {
     if(balConstructor.y < blok.y + 2 + blok.h + balConstructor.diameter / 2 && balConstructor.x > blok.x  && balConstructor.x < blok.x + blok.b){
+      if(blok.powerup.enabled){
+        let type = powerUp[blok.powerup.type];
+        console.log(type)
+        switch(type){
+          case "BIGGER_PLANK":
+              plankConstructor.width = 150;
+              setTimeout(() => {
+                plankConstructor.width = 100;
+              }, 30000);
+              break;
+          case "EXTRA_BALL":
+
+              break;
+          case "TRIPLE_BALL":
+              break;
+        }
+      }
       blokGeluid.play();
       console.log("Block broken");
       score++;

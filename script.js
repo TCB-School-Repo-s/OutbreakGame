@@ -15,7 +15,16 @@ let score = 0;
 let level = 1;
 let currentSong;
 const kleurtjes = ['#7400B8', '#6930C3', '#5E60CE', '#5390D9', '#4EA8DE', '#48BFE3', '#56CFE1', '#64DFDF', '#72EFDD', '#80FFDB'];
+const powerUp = ['BIGGER_PLANK', "EXTRA_BALL", "TRIPLE_BALL"]
 const blokkies = [];
+
+/*
+Voor de bal:
+1. Class voor bal object maken (gedaan)
+2. functie omschrijven om bal class the gebruiker(gedaan)
+3. functie herschrijven om als er meer ballen zijn niet gelijk leven eraf
+3.1 Als er weer maar 1 bal is dan natuurlijk weer leven eraf 
+*/
 
 // save data
 if(window.localStorage.getItem('musicVolume') === null){ // muziekVolume opslaan
@@ -29,7 +38,7 @@ if(window.localStorage.getItem('leaderboard') === null){
   // leaderboard komt hier
 }
 
-// Constructors
+// Plank constructor -- will be converted to
 const plankConstructor = {
   x: 750,
   y: 700,
@@ -37,17 +46,138 @@ const plankConstructor = {
   kleur: "#ABABAB"
 }
 
+// Place the plank in the middle of the screen
 plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2);
 plankConstructor.y = canvasHeight - 50;
 
-const balConstructor = {
-  x: plankConstructor.x + (plankConstructor.width / 2),
-  y: plankConstructor.y - 25,
-  diameter: 30,
-  kleur: "#E6E6FA"
+
+// Ball to construct a ball
+class BallClass {
+
+  constructor(x, y, diameter, kleur){
+    this.x = x;
+    this.y = y;
+    this.diameter = diameter;
+    this.kleur = kleur;
+  }
+
+  drawBall() {
+    noStroke();
+    fill(this.kleur)
+    ellipse(this.x, this.y, this.diameter, this.diameter);
+  }
+
 }
 
-const powerUp = ['BIGGER_PLANK', "EXTRA_BALL", "TRIPLE_BALL"]
+/*
+class PlankClass {
+
+  constructor(x, y, width, height, kleur, round){
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.kleur = kleur;
+    this.round = round
+  }
+
+  drawPlank(){
+    noStroke();
+    fill(this.kleur);
+    rect(this.x, this.y, this.width, this.height, this.round);
+  }
+
+}
+
+const plank = new PlankClass((canvasWidth / 2) - (plankConstructor.width / 2), canvasHeight - 50, 100, 20, 25);
+
+*/
+
+const ballArray = [new BallClass(plankConstructor.x + (plankConstructor.width / 2), plankConstructor.y - 25, 30, "#FFFFFF"), new BallClass(plankConstructor.x + (plankConstructor.width / 2), plankConstructor.y - 25, 30, "#FFFFFF")] // register all balls needed (three in total)
+
+function ball(ballObject) {
+  ballObject.drawBall(); // drawBall method from the ball class
+
+  if (ballObject.y <= ballObject.diameter / 2) { // If ball touches ceiling of canvas, bounce off
+    balSnelheidY *= -1;
+  }
+  if (ballObject.x <= ballObject.diameter / 2 || ballObject.x >= width - (ballObject.diameter / 2)) { // If ball touches edge of canvas, bounce off
+    balSnelheidX *= -1;
+  }
+  if (ballObject.y >= height - ((height - plankConstructor.y) + (ballObject.diameter / 2)) && ballObject.x >= plankConstructor.x && ballObject.x <= plankConstructor.x + (plankConstructor.width / 2)) { // If ball touches first part of plank, bounce to the left and bounce off
+    if (balSnelheidX < 0) balSnelheidX = balSnelheidX; // invertion of ballx
+    if (balSnelheidX > 0) balSnelheidX *= -1;
+    plankGeluid.play();
+    rightKey = false
+    leftKey = false
+    balSnelheidY *= -1;
+  }
+  if (ballObject.y >= height - ((height - plankConstructor.y) + (ballObject.diameter / 2)) && ballObject.x >= plankConstructor.x + (plankConstructor.width / 2) && ballObject.x <= plankConstructor.x + plankConstructor.width) { // if ball touches second part of the plank, bounce to the right and bounce off
+    if (balSnelheidX < 0) balSnelheidX *= -1;
+    if (balSnelheidX > 0) balSnelheidX = balSnelheidX;
+    plankGeluid.play();
+    rightKey = false
+    leftKey = false
+    balSnelheidY *= -1;
+  }
+
+  // Check for each block if the ball touches it and then remove the block from array
+  blokkies.forEach((blok, index) => {
+    if(ballObject.y < blok.y + 2 + blok.h + ballObject.diameter / 2 && ballObject.x > blok.x  && ballObject.x < blok.x + blok.b){
+      if(blok.powerup.enabled){
+        let type = powerUp[blok.powerup.type];
+        console.log(type)
+        switch(type){
+          case "BIGGER_PLANK":
+              plankConstructor.width = 150;
+              setTimeout(() => {
+                plankConstructor.width = 100;
+              }, 30000);
+              break;
+          case "EXTRA_BALL":
+
+              break;
+          case "TRIPLE_BALL":
+              break;
+        }
+      }
+      blokGeluid.play(); // plays block sound
+      console.log("Block broken");
+      score++;
+      blokkies.splice(index, 1);
+      balSnelheidY *= -1;
+    }
+  })
+
+// Checks if there are any blocks left, if there are none --> next level
+  if(blokkies.length === 0){
+    level++
+    balSnelheidX++
+    balSnelheidY++
+    if (rij <= 14){
+      rij++
+    }
+    volgendLevel = true;
+    gameIsGestart = false;
+  }
+
+  // Checks if the ball goes out of screen on the bottom. if it is --> lose life
+  if (ballObject.y >= 750) {
+    if (levens === 0) { // no lives left? game over
+      currentSong.stop();
+      gameIsGestart = false;
+      gameOverGeluid.play();
+    } else {
+      levenKwijtGeluid.play();
+      levenKwijt = true;
+      levens--;
+    }
+  }
+
+  // ball movement
+  ballObject.x += balSnelheidX;
+  ballObject.y += balSnelheidY;
+}
 
 // Preload and Setup
 function preload() {
@@ -69,9 +199,11 @@ function preload() {
   gui.addGlobals('muziekVolume');
 }
 
+
+
 function setup() {
   createCanvas(canvasWidth, canvasHeight);
-  maakBlokkies();
+  maakBlokkies(); // creates blocks and pushes them to array
   blokGeluid.setVolume(0.3);
   plankGeluid.setVolume(0.3);
   levenKwijtGeluid.setVolume(0.3);
@@ -151,7 +283,7 @@ function maakBlokkies() {
     for (let l = 0; l < rij; l++) {
       // const powerupType = Math.round(Math.random() * (2 - 0) + 0)
       const powerupType = 0;
-      
+
       const blok = {
         kleur: kleurtjes[l],
         h: 30,
@@ -187,7 +319,7 @@ function eindeSpel() {
   text('Je eindscore is ' + score, canvasWidth / 2, canvasHeight / 2 + 40);
 }
 
-
+// Hart shape
 function hart(x, y, s) {
   beginShape();
   vertex(x, y);
@@ -196,91 +328,8 @@ function hart(x, y, s) {
   endShape(CLOSE);
 }
 
-// Ball function
-function bal() {
-  noStroke();
-  fill(balConstructor.kleur);
-  ellipse(balConstructor.x, balConstructor.y, balConstructor.diameter, balConstructor.diameter);
 
-  if (balConstructor.y <= balConstructor.diameter / 2) { // If ball touches ceiling of canvas, bounce off
-    balSnelheidY *= -1;
-  }
-  if (balConstructor.x <= balConstructor.diameter / 2 || balConstructor.x >= width - (balConstructor.diameter / 2)) { // If ball touches edge of canvas, bounce off
-    balSnelheidX *= -1;
-  }
-  if (balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x && balConstructor.x <= plankConstructor.x + (plankConstructor.width / 2)) { // If ball touches first part of plank, bounce to the left and bounce off
-    if (balSnelheidX < 0) balSnelheidX = balSnelheidX;
-    if (balSnelheidX > 0) balSnelheidX *= -1;
-    plankGeluid.play();
-    rightKey = false
-    leftKey = false
-    balSnelheidY *= -1;
-  }
-  if (balConstructor.y >= height - ((height - plankConstructor.y) + (balConstructor.diameter / 2)) && balConstructor.x >= plankConstructor.x + (plankConstructor.width / 2) && balConstructor.x <= plankConstructor.x + plankConstructor.width) { // if ball touches second part of the plank, bounce to the right and bounce off
-    if (balSnelheidX < 0) balSnelheidX *= -1;
-    if (balSnelheidX > 0) balSnelheidX = balSnelheidX;
-    plankGeluid.play();
-    rightKey = false
-    leftKey = false
-    balSnelheidY *= -1;
-  }
 
-  blokkies.forEach((blok, index) => {
-    if(balConstructor.y < blok.y + 2 + blok.h + balConstructor.diameter / 2 && balConstructor.x > blok.x  && balConstructor.x < blok.x + blok.b){
-      if(blok.powerup.enabled){
-        let type = powerUp[blok.powerup.type];
-        console.log(type)
-        switch(type){
-          case "BIGGER_PLANK":
-              plankConstructor.width = 150;
-              setTimeout(() => {
-                plankConstructor.width = 100;
-              }, 30000);
-              break;
-          case "EXTRA_BALL":
-
-              break;
-          case "TRIPLE_BALL":
-              break;
-        }
-      }
-      blokGeluid.play();
-      console.log("Block broken");
-      score++;
-      blokkies.splice(index, 1);
-      balSnelheidY *= -1;
-    }
-  })
-
-  if(blokkies.length === 0){
-    level++
-    balSnelheidX++
-    balSnelheidY++
-    if (rij <= 14){
-      rij++
-    }
-    volgendLevel = true;
-    gameIsGestart = false;
-  }
-
-  if (balConstructor.y >= 750) {
-    if (levens === 0) {
-      currentSong.stop();
-      gameIsGestart = false;
-      gameOverGeluid.play();
-    } else {
-      levenKwijtGeluid.play();
-      levenKwijt = true;
-      levens--;
-    }
-  }
-
-  // ball movement
-  balConstructor.x += balSnelheidX;
-  balConstructor.y += balSnelheidY;
-}
-
-// Draw plank
 function gekkePlank() {
   fill(plankConstructor.kleur);
   rect(plankConstructor.x, plankConstructor.y, plankConstructor.width, 20, 25);
@@ -300,11 +349,13 @@ function keyPressed() {
       leftKey = true;
       break;
     case 32:
-      if (levenKwijt) {
+      if (levenKwijt) { // Life lost and pressed space? restart game
         levenKwijt = false;
-        balConstructor.y = plankConstructor.y - 25;
-        balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
-      } else if (!gameIsGestart && !volgendLevel) {
+        ballArray.forEach((ball) => {
+          ball.y = plankConstructor.y - 25;
+          ball.x = plankConstructor.x + (plankConstructor.width / 2);
+        })
+      } else if (!gameIsGestart && !volgendLevel) { // Game over and pressed space? restart game from zero
         rij = 9;
         kolom = 8;
         level = 1;
@@ -315,14 +366,18 @@ function keyPressed() {
         score = 0;
         levens = 3;
         plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2);
-        balConstructor.y = plankConstructor.y - 25;
-        balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
+        ballArray.forEach((ball) => {
+          ball.y = plankConstructor.y - 25;
+          ball.x = plankConstructor.x + (plankConstructor.width / 2);
+        })
         gameIsGestart = true;
-      } else if (!gameIsGestart && volgendLevel){
+      } else if (!gameIsGestart && volgendLevel){ // Goes to next level if you pressed space.
         maakBlokkies();
         plankConstructor.x = (canvasWidth / 2) - (plankConstructor.width / 2);
-        balConstructor.y = plankConstructor.y - 25;
-        balConstructor.x = plankConstructor.x + (plankConstructor.width / 2);
+        ballArray.forEach((ball) => {
+          ball.y = plankConstructor.y - 25;
+          ball.x = plankConstructor.x + (plankConstructor.width / 2);
+        })
         volgendLevel = false;
         gameIsGestart = true;
       }
@@ -366,7 +421,7 @@ function draw() {
     }
     blokkiesZeichnen()
     gekkePlank();
-    bal();
+    ball(ballArray[0]);
     mainSchermTekst();
   } else if (levenKwijt) {
     levenKwijtScherm();

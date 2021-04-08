@@ -1,3 +1,8 @@
+/*
+P5.js Game
+Gemaakt door Lotte en Bas
+*/
+
 // Required variables
 let rightKey = false;
 let leftKey = false;
@@ -17,14 +22,6 @@ let currentSong;
 const kleurtjes = ['#7400B8', '#6930C3', '#5E60CE', '#5390D9', '#4EA8DE', '#48BFE3', '#56CFE1', '#64DFDF', '#72EFDD', '#80FFDB'];
 const powerUp = ['BIGGER_PLANK', "EXTRA_BALL", "TRIPLE_BALL"]
 const blokkies = [];
-
-/*
-Voor de bal:
-1. Class voor bal object maken (gedaan)
-2. functie omschrijven om bal class the gebruiker(gedaan)
-3. functie herschrijven om als er meer ballen zijn niet gelijk leven eraf
-3.1 Als er weer maar 1 bal is dan natuurlijk weer leven eraf 
-*/
 
 // save data
 if(window.localStorage.getItem('musicVolume') === null){ // muziekVolume opslaan
@@ -68,30 +65,6 @@ class BallClass {
   }
 
 }
-
-/*
-class PlankClass {
-
-  constructor(x, y, width, height, kleur, round){
-    this.x = x;
-    this.y = y;
-    this.width = width;
-    this.height = height;
-    this.kleur = kleur;
-    this.round = round
-  }
-
-  drawPlank(){
-    noStroke();
-    fill(this.kleur);
-    rect(this.x, this.y, this.width, this.height, this.round);
-  }
-
-}
-
-const plank = new PlankClass((canvasWidth / 2) - (plankConstructor.width / 2), canvasHeight - 50, 100, 20, 25);
-
-*/
 
 const ballArray = [new BallClass(plankConstructor.x + (plankConstructor.width / 2), plankConstructor.y - 25, 30, "#FFFFFF"), new BallClass(plankConstructor.x + (plankConstructor.width / 2), plankConstructor.y - 25, 30, "#FFFFFF")] // register all balls needed (three in total)
 
@@ -247,7 +220,7 @@ function mainSchermTekst() {
   text('Score: ' + score, 45, 30);
 
   // levens
-  switch (levens) {
+  switch (levens) { // switch om het goede aantal levens te laten zien
     case 3:
       fill('#E6E6FA')
       hart(width - 80, 10, 25)
@@ -267,24 +240,24 @@ function mainSchermTekst() {
 
 }
 
-function chance(p){
-  var d = Math.random();
+function chance(p){ // kans functie 
+  var d = Math.random(); // genereer random cijfer tussen 0 en 1
   if(d < ((100 - p) / 100)){
     return false;
-  }else {
+  }else { // p% kans op true
     return true;
   }
 }
 
 // Maakt de blokjes
 function maakBlokkies() {
-  const blokBreedte = width / kolom - 4
-  for (let c = 0; c < kolom; c++) {
-    for (let l = 0; l < rij; l++) {
+  const blokBreedte = width / kolom - 4 // bereken de venster breedte.
+  for (let c = 0; c < kolom; c++) { // for loop
+    for (let l = 0; l < rij; l++) { // for loop
       // const powerupType = Math.round(Math.random() * (2 - 0) + 0)
       const powerupType = 0;
 
-      const blok = {
+      const blok = { // block constructor
         kleur: kleurtjes[l],
         h: 30,
         b: blokBreedte,
@@ -300,8 +273,8 @@ function maakBlokkies() {
   }
 }
 
-function blokkiesZeichnen() {
-  blokkies.forEach(blok => {
+function blokkiesZeichnen() { // blokken van de blokkies array tekenen
+  blokkies.forEach(blok => { // for each functie
     fill(blok.kleur);
     rect(blok.x, blok.y, blok.b, blok.h);
   })
@@ -330,18 +303,18 @@ function hart(x, y, s) {
 
 
 
-function gekkePlank() {
+function gekkePlank() { // functie voor plank 
   fill(plankConstructor.kleur);
   rect(plankConstructor.x, plankConstructor.y, plankConstructor.width, 20, 25);
-  if (rightKey && plankConstructor.x < width - plankConstructor.width) {
+  if (rightKey && plankConstructor.x < width - plankConstructor.width) { // als rechter toets in gedrukt is, dan naar rechts bewegen
     plankConstructor.x += 18;
-  } else if (leftKey && plankConstructor.x > 0) {
+  } else if (leftKey && plankConstructor.x > 0) { // zie hierboven maar dan voor links.
     plankConstructor.x -= 18;
   }
 }
 
-function keyPressed() {
-  switch (keyCode) {
+function keyPressed() { // standaard p5 functie
+  switch (keyCode) { // switch voor verschillende toetsen
     case 39:
       rightKey = true;
       break;
@@ -385,10 +358,10 @@ function keyPressed() {
   }
 }
 
-function keyReleased() {
-  switch (keyCode) {
+function keyReleased() { // standaard p5 functie
+  switch (keyCode) { // switch voor verschillende toetsen
     case 39:
-      rightKey = false;
+      rightKey = false; // wordt rechter pijltje losgelaten dan stoppen met bewegen
       break;
     case 37:
       leftKey = false;
@@ -402,33 +375,33 @@ function draw() {
   background("#000000");
   window.localStorage.setItem('musicVolume', muziekVolume);
   if (gameIsGestart && !levenKwijt) {// If gameIsGestart and there is no life lost, draw plank and ball
-    if(currentSong){ 
-      if(!currentSong.isPlaying()){
+    if(currentSong){ // check of currentsong bestaat
+      if(!currentSong.isPlaying()){ // check of hij speelt
         let song = Math.round(Math.random() * (4 - 0) + 0);
         console.log(song)
-        currentSong = themeSongs[song];
-        currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume')));
-        currentSong.play();
-      }else{
+        currentSong = themeSongs[song]; // zet currentsong naar random liedje (gegenereert in song)
+        currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume'))); // zet volume naar localstorage variable
+        currentSong.play(); // speel
+      }else{ // Speelt er al een liedje --> toch volume aanpassen
         currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume')))
       }
-    }else {
-      let song = Math.round(Math.random() * (4 - 0) + 0);
-      console.log(song)
-      currentSong = themeSongs[song];
-      currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume')));
-      currentSong.play();
+    }else { // Geen current song? Dan gaan we dr eentje aanmaken
+      let song = Math.round(Math.random() * (4 - 0) + 0); // random cijfer tussen 0 en 4
+      console.log(song) // log welke liedje
+      currentSong = themeSongs[song]; // zet current song naar random cijfer in array
+      currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume'))); // volume aanpassen
+      currentSong.play(); // liedje spelen.
     }
     blokkiesZeichnen()
     gekkePlank();
     ball(ballArray[0]);
     mainSchermTekst();
-  } else if (levenKwijt) {
+  } else if (levenKwijt) { // leven kwijt
     levenKwijtScherm();
     currentSong.setVolume(parseFloat(window.localStorage.getItem('musicVolume')));
-  } else if (!gameIsGestart && !volgendLevel) {
+  } else if (!gameIsGestart && !volgendLevel) { // game over
     eindeSpel();
-  } else if(volgendLevel && !gameIsGestart){
+  } else if(volgendLevel && !gameIsGestart){ // volgend level
     volgendlevelScherm();
   }
 }
